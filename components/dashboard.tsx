@@ -1,184 +1,143 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AnimatedAgent } from './animated-agent';
-import { Agent, agentManager } from '@/lib/agents';
+import { motion } from 'framer-motion';
+
+const AGENTS = ['Atlas', 'Echo', 'Nova', 'Flux', 'Iris'];
+
+interface AnimatingAgent {
+  id: number;
+  name: string;
+  x: number;
+  y: number;
+}
 
 export function Dashboard() {
-  const [agents, setAgents] = useState<Agent[]>([]);
-  const [systemHealth, setSystemHealth] = useState<any>(null);
-  const [autoRefresh, setAutoRefresh] = useState(true);
-  const [loading, setLoading] = useState(true);
-
-  const refreshData = () => {
-    const agents = agentManager.getAgents();
-    const health = agentManager.getSystemHealth();
-    setAgents(agents);
-    setSystemHealth(health);
-    setLoading(false);
-  };
+  const [agents, setAgents] = useState<AnimatingAgent[]>([]);
 
   useEffect(() => {
-    refreshData();
+    setAgents(
+      AGENTS.map((name, i) => ({
+        id: i,
+        name,
+        x: Math.random() * 90,
+        y: Math.random() * 70,
+      }))
+    );
   }, []);
 
   useEffect(() => {
-    if (!autoRefresh) return;
-
     const interval = setInterval(() => {
-      refreshData();
-    }, 2000);
+      setAgents((prev) =>
+        prev.map((agent) => ({
+          ...agent,
+          x: Math.random() * 90,
+          y: Math.random() * 70,
+        }))
+      );
+    }, 4000);
 
     return () => clearInterval(interval);
-  }, [autoRefresh]);
-
-  const handleInjectError = async (agentId: string) => {
-    try {
-      await fetch('/api/errors', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ agentId, action: 'inject' }),
-      });
-      refreshData();
-    } catch (error) {
-      console.error('Error injecting error:', error);
-    }
-  };
-
-  const handleResolveError = async (agentId: string) => {
-    try {
-      await fetch('/api/errors', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ agentId, action: 'resolve' }),
-      });
-      refreshData();
-    } catch (error) {
-      console.error('Error resolving error:', error);
-    }
-  };
-
-  const handleInjectRandomError = async () => {
-    try {
-      await fetch('/api/errors', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'random' }),
-      });
-      refreshData();
-    } catch (error) {
-      console.error('Error injecting random error:', error);
-    }
-  };
-
-  if (loading || !systemHealth) {
-    return (
-      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4" />
-          <p>Loading agents...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const statusColor = systemHealth.status === 'healthy' ? 'text-green-400' : systemHealth.status === 'degraded' ? 'text-yellow-400' : 'text-red-400';
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
-      {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900 bg-opacity-50 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <h1 className="text-4xl font-bold mb-2">Band of Agents</h1>
-          <p className="text-gray-400">A demo app for BAND OF AGENTS hackathon</p>
-        </div>
-      </header>
+    <main className="relative min-h-screen bg-white overflow-hidden">
+      {/* Subtle background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-blue-50" />
 
-      {/* System Health Card */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="bg-slate-800 bg-opacity-50 backdrop-blur border border-slate-700 rounded-lg p-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">System Status</h2>
-            <div className={`text-2xl font-bold ${statusColor}`}>{systemHealth.status.toUpperCase()}</div>
-          </div>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-slate-900 rounded p-4">
-              <div className="text-sm text-gray-400 mb-1">Healthy Agents</div>
-              <div className="text-2xl font-bold text-green-400">{systemHealth.agents.healthy}/5</div>
-            </div>
-            <div className="bg-slate-900 rounded p-4">
-              <div className="text-sm text-gray-400 mb-1">Avg Latency</div>
-              <div className="text-2xl font-bold text-blue-400">{systemHealth.metrics.avgResponseTime.toFixed(0)}ms</div>
-            </div>
-            <div className="bg-slate-900 rounded p-4">
-              <div className="text-sm text-gray-400 mb-1">Avg CPU</div>
-              <div className="text-2xl font-bold text-orange-400">{systemHealth.metrics.avgCpu.toFixed(1)}%</div>
-            </div>
-          </div>
-        </div>
+      {/* Animated floating blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{
+            x: [0, 50, 0],
+            y: [0, 30, 0],
+          }}
+          transition={{ duration: 20, repeat: Infinity }}
+          className="absolute top-20 left-10 w-72 h-72 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"
+        />
+        <motion.div
+          animate={{
+            x: [0, -50, 0],
+            y: [0, -30, 0],
+          }}
+          transition={{ duration: 25, repeat: Infinity, delay: 2 }}
+          className="absolute bottom-20 right-10 w-72 h-72 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"
+        />
+      </div>
 
-        {/* Control Panel */}
-        <div className="bg-slate-800 bg-opacity-50 backdrop-blur border border-slate-700 rounded-lg p-6 mb-8">
-          <div className="flex items-center gap-4 flex-wrap">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={autoRefresh}
-                onChange={(e) => setAutoRefresh(e.target.checked)}
-                className="w-4 h-4"
-              />
-              <span className="text-sm">Auto Refresh (2s)</span>
-            </label>
-            <button
-              onClick={refreshData}
-              className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 transition text-sm font-medium"
-            >
-              🔄 Refresh Now
-            </button>
-            <button
-              onClick={handleInjectRandomError}
-              className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 transition text-sm font-medium ml-auto"
-            >
-              💥 Inject Random Error
-            </button>
-          </div>
-        </div>
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-20"
+        >
+          <h1 className="text-6xl font-bold mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Band of Agents
+          </h1>
+          <p className="text-xl text-slate-600">
+            A demo app for BAND OF AGENTS hackathon
+          </p>
+        </motion.div>
 
-        {/* Agents Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-          {agents.map((agent) => (
-            <div
+        {/* Animated Agents Container */}
+        <div className="relative w-full max-w-3xl h-96 mb-16">
+          {agents.map((agent, index) => (
+            <motion.div
               key={agent.id}
-              className="bg-slate-800 bg-opacity-50 backdrop-blur border border-slate-700 rounded-lg p-6"
+              animate={{
+                x: `${agent.x}%`,
+                y: `${agent.y}%`,
+              }}
+              transition={{
+                duration: 4,
+                ease: 'easeInOut',
+              }}
+              className="absolute"
             >
-              <AnimatedAgent
-                agent={agent}
-                onInject={handleInjectError}
-                onResolve={handleResolveError}
-              />
-            </div>
+              {/* Agent circle */}
+              <motion.div
+                animate={{ scale: [1, 1.15, 1] }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  delay: index * 0.2,
+                }}
+                className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white font-semibold text-sm cursor-pointer transition-all hover:shadow-xl
+                  ${
+                    index === 0
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600'
+                      : index === 1
+                        ? 'bg-gradient-to-r from-purple-500 to-purple-600'
+                        : index === 2
+                          ? 'bg-gradient-to-r from-cyan-500 to-cyan-600'
+                          : index === 3
+                            ? 'bg-gradient-to-r from-indigo-500 to-indigo-600'
+                            : 'bg-gradient-to-r from-pink-500 to-pink-600'
+                  }
+                `}
+              >
+                {agent.name[0]}
+              </motion.div>
+            </motion.div>
           ))}
         </div>
 
-        {/* API Documentation */}
-        <div className="bg-slate-800 bg-opacity-50 backdrop-blur border border-slate-700 rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-4">API Endpoints</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div className="bg-slate-900 rounded p-4">
-              <div className="font-mono text-blue-400 mb-2">GET /api/health</div>
-              <p className="text-gray-400">Get system and agent health status</p>
-            </div>
-            <div className="bg-slate-900 rounded p-4">
-              <div className="font-mono text-blue-400 mb-2">GET /api/logs</div>
-              <p className="text-gray-400">Fetch logs with filtering options</p>
-            </div>
-            <div className="bg-slate-900 rounded p-4">
-              <div className="font-mono text-blue-400 mb-2">POST /api/errors</div>
-              <p className="text-gray-400">Inject or resolve errors</p>
-            </div>
-          </div>
-        </div>
+        {/* Description */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 0.4 }}
+          className="text-center max-w-2xl"
+        >
+          <p className="text-lg text-slate-600 leading-relaxed">
+            Intelligent agents working in harmony. Experience a seamless collaboration 
+            between autonomous agents solving complex problems efficiently and in real-time.
+          </p>
+        </motion.div>
       </div>
-    </div>
+    </main>
   );
 }
