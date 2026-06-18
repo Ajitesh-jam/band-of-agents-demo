@@ -1,12 +1,15 @@
 {
-  "name": "my-project",
+  "name": "band-of-agents-demo",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://ajitesh-jam.github.io/band-of-agents-demo/",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "build:pages": "GITHUB_PAGES=true next build",
     "preview:pages": "node scripts/preview-pages.mjs",
+    "predeploy": "npm run build:pages",
+    "deploy": "gh-pages -d out",
     "start": "next start",
     "lint": "eslint ."
   },
@@ -29,6 +32,7 @@
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "gh-pages": "^6.3.0",
     "postcss": "^8.5",
     "tailwindcss": "^4.2.0",
     "typescript": "5.7.3"
