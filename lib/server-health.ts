@@ -26,6 +26,17 @@ const STATE_FILE = join(STATE_DIR, 'server-health.json')
 
 const MAX_ERRORS = 20
 
+/** Sources that should mark the server unhealthy until explicit recover. */
+const CRASH_SOURCES = new Set([
+  'route-error',
+  'global-error',
+  'uncaughtException',
+  'unhandledRejection',
+  'build-error',
+  'compile-error',
+  'file-error',
+])
+
 function defaultState(): ServerHealthState {
   return { crash: null, errors: [] }
 }
@@ -50,8 +61,17 @@ function saveState(state: ServerHealthState) {
 
 let state = loadState()
 
+/** Re-read persisted state so /api/health sees crashes written by other routes/workers. */
+function syncStateFromDisk() {
+  state = loadState()
+}
+
 function touch() {
   saveState(state)
+}
+
+function shouldEscalateToCrash(source: string, details?: { file?: string }) {
+  return CRASH_SOURCES.has(source) || Boolean(details?.file)
 }
 
 export function reportServerError(
@@ -59,6 +79,7 @@ export function reportServerError(
   message: string,
   details?: { stack?: string; file?: string }
 ) {
+  syncStateFromDisk()
   state.errors.push({
     source,
     message,
@@ -69,6 +90,14 @@ export function reportServerError(
   if (state.errors.length > MAX_ERRORS) {
     state.errors = state.errors.slice(-MAX_ERRORS)
   }
+  if (shouldEscalateToCrash(source, details) && !state.crash?.active) {
+    state.crash = {
+      active: true,
+      timestamp: new Date().toISOString(),
+      reason: message,
+      errorCode: details?.file ? 'FILE_ERROR' : 'RUNTIME_ERROR',
+    }
+  }
   touch()
 }
 
@@ -76,6 +105,7 @@ export function setServerCrash(
   reason = 'Fatal application crash',
   errorCode = 'FATAL_APP_CRASH'
 ): CrashState {
+  syncStateFromDisk()
   state.crash = {
     active: true,
     timestamp: new Date().toISOString(),
@@ -87,16 +117,19 @@ export function setServerCrash(
 }
 
 export function clearServerCrash() {
+  syncStateFromDisk()
   state.crash = null
   touch()
 }
 
 export function clearServerErrors() {
+  syncStateFromDisk()
   state.errors = []
   touch()
 }
 
 export function getServerHealthState() {
+  syncStateFromDisk()
   return {
     crash: state.crash,
     errors: [...state.errors],
@@ -121,14 +154,55 @@ function readHealthyTemplate(): Record<string, unknown> {
 }
 
 export function isServerHealthy() {
-  const now = Date.now()
-  state.errors = state.errors.filter(
-    (entry) => now - new Date(entry.timestamp).getTime() < 120_000
-  )
+  syncStateFromDisk()
   return state.crash?.active !== true && state.errors.length === 0
 }
 
+const RECOVERABLE_ERROR_CODES = new Set([
+  'APPLICATION_ERROR',
+  'COMPILE_ERROR',
+  'FILE_ERROR',
+  'RUNTIME_ERROR',
+])
+
+export function markApplicationFailure(
+  message: string,
+  errorCode = 'APPLICATION_ERROR'
+) {
+  syncStateFromDisk()
+  if (state.crash?.active && !RECOVERABLE_ERROR_CODES.has(state.crash.errorCode)) {
+    return
+  }
+  state.crash = {
+    active: true,
+    timestamp: new Date().toISOString(),
+    reason: message,
+    errorCode,
+  }
+  const alreadyLogged = state.errors.some(
+    (entry) => entry.source === 'application-health' && entry.message === message
+  )
+  if (!alreadyLogged) {
+    state.errors.push({
+      source: 'application-health',
+      message,
+      timestamp: new Date().toISOString(),
+    })
+  }
+  touch()
+}
+
+export function clearRecoverableApplicationFailure() {
+  syncStateFromDisk()
+  if (state.crash?.active && RECOVERABLE_ERROR_CODES.has(state.crash.errorCode)) {
+    state.crash = null
+    state.errors = state.errors.filter((entry) => entry.source !== 'application-health')
+    touch()
+  }
+}
+
 export function buildHealthPayload() {
+  syncStateFromDisk()
   const timestamp = new Date().toISOString()
   const crashed = state.crash?.active === true
   const hasErrors = state.errors.length > 0

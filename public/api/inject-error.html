@@ -8,13 +8,25 @@
 <body>
   <p>Injecting fatal error and crashing application...</p>
   <script>
-    localStorage.setItem('band-app-crash', JSON.stringify({
-      active: true,
-      timestamp: new Date().toISOString(),
-      reason: 'Fatal error injected via GET /api/inject-error.html',
-      errorCode: 'FATAL_APP_CRASH'
-    }));
-    window.location.replace('/band-of-agents-demo/');
+    (function () {
+      var base = (document.querySelector('base') && document.querySelector('base').getAttribute('href')) || '/';
+      base = base.replace(/\/$/, '');
+      var payload = {
+        active: true,
+        timestamp: new Date().toISOString(),
+        reason: 'Fatal error injected via GET /api/inject-error.html',
+        errorCode: 'FATAL_APP_CRASH'
+      };
+      localStorage.setItem('band-app-crash', JSON.stringify(payload));
+      fetch(base + '/api/crash', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: payload.reason, errorCode: payload.errorCode }),
+        keepalive: true
+      }).finally(function () {
+        window.location.replace(base + '/');
+      });
+    })();
   </script>
 </body>
 </html>

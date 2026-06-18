@@ -57,9 +57,18 @@ export function Dashboard() {
     setPanelData(null);
   }
 
-  function handleHealth() {
+  async function handleHealth() {
     setPanel('health');
-    showPanel('System Health', bandAPI.getHealth());
+    showPanel('System Health', { status: 'loading', message: 'Fetching server health…' });
+    try {
+      const data = await bandAPI.fetchHealth();
+      showPanel('System Health', data);
+    } catch {
+      showPanel('System Health', {
+        status: 'error',
+        message: 'Failed to fetch /api/health',
+      });
+    }
   }
 
   function handleLogs() {

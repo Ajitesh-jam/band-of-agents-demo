@@ -136,16 +136,19 @@ export const bandAPI = {
   },
 
   /** Crash the entire app (persists until recover is called) */
-  injectFatalError(reason = 'Fatal error injected via bandAPI.injectFatalError()') {
+  async injectFatalError(reason = 'Fatal error injected via bandAPI.injectFatalError()') {
     const record = setAppCrash(reason)
     logger.error('Fatal application crash injected', { reason, errorCode: record.errorCode })
     addDeploymentLog(`FATAL: ${reason}`, 'error', 'system')
-    void fetch(apiUrl('/api/crash'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reason, errorCode: record.errorCode }),
-      keepalive: true,
-    }).catch(() => {})
+    try {
+      await fetch(apiUrl('/api/crash'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason, errorCode: record.errorCode }),
+      })
+    } catch {
+      // localStorage crash state still applies for the UI
+    }
     window.location.reload()
     return { success: true, crashed: true, ...record }
   },
