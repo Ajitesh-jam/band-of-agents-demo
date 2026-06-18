@@ -10,9 +10,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.app',
+  title: 'Band of Agents - Hackathon Demo',
+  description: 'A demo app for BAND OF AGENTS hackathon',
   icons: {
     icon: [
       {
