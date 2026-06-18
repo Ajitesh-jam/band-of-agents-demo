@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:pages": "GITHUB_PAGES=true next build",
+    "build:pages": "node scripts/generate-api-files.mjs && GITHUB_PAGES=true next build",
     "preview:pages": "node scripts/preview-pages.mjs",
     "predeploy": "npm run build:pages",
     "deploy": "gh-pages -d out",

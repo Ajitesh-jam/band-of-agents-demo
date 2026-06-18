@@ -1,0 +1,42 @@
+{
+  "status": "ok",
+  "timestamp": "2026-06-18T20:25:10.809Z",
+  "count": 5,
+  "logs": [
+    {
+      "id": "d1",
+      "timestamp": "2026-06-18T20:25:10.809Z",
+      "level": "success",
+      "source": "deploy",
+      "message": "gh-pages deploy completed successfully"
+    },
+    {
+      "id": "d2",
+      "timestamp": "2026-06-18T20:24:25.810Z",
+      "level": "info",
+      "source": "build",
+      "message": "Next.js static export written to out/"
+    },
+    {
+      "id": "d3",
+      "timestamp": "2026-06-18T20:23:40.810Z",
+      "level": "info",
+      "source": "pages",
+      "message": "Published to https://ajitesh-jam.github.io/band-of-agents-demo/"
+    },
+    {
+      "id": "d4",
+      "timestamp": "2026-06-18T20:23:10.810Z",
+      "level": "info",
+      "source": "build",
+      "message": "Base path set to /band-of-agents-demo/"
+    },
+    {
+      "id": "d5",
+      "timestamp": "2026-06-18T20:22:40.810Z",
+      "level": "info",
+      "source": "system",
+      "message": "Static API endpoints generated: health, logs, deployment-logs"
+    }
+  ]
+}
