@@ -1,0 +1,43 @@
+{
+  "status": "ok",
+  "timestamp": "2026-06-18T20:25:10.809Z",
+  "count": 4,
+  "logs": [
+    {
+      "id": "1",
+      "timestamp": "2026-06-18T20:25:10.809Z",
+      "level": "info",
+      "message": "Agents initialized",
+      "context": {
+        "count": 5
+      }
+    },
+    {
+      "id": "2",
+      "timestamp": "2026-06-18T20:24:40.810Z",
+      "level": "info",
+      "message": "Static API files generated for GitHub Pages",
+      "context": {
+        "source": "build"
+      }
+    },
+    {
+      "id": "3",
+      "timestamp": "2026-06-18T20:24:10.810Z",
+      "level": "info",
+      "message": "Health endpoint available at /api/health.json",
+      "context": {
+        "source": "deploy"
+      }
+    },
+    {
+      "id": "4",
+      "timestamp": "2026-06-18T20:23:40.810Z",
+      "level": "info",
+      "message": "Deployment logs available at /api/deployment-logs.json",
+      "context": {
+        "source": "deploy"
+      }
+    }
+  ]
+}

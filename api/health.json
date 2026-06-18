@@ -1,0 +1,79 @@
+{
+  "status": "ok",
+  "timestamp": "2026-06-18T20:25:10.809Z",
+  "systemHealth": {
+    "status": "healthy",
+    "agents": {
+      "healthy": 5,
+      "degraded": 0,
+      "error": 0
+    },
+    "metrics": {
+      "avgCpu": 12.3,
+      "avgMemory": 24.5,
+      "avgResponseTime": 95.6
+    }
+  },
+  "agents": [
+    {
+      "id": "agent-1",
+      "name": "Atlas",
+      "status": "healthy",
+      "metrics": {
+        "cpu": 19.9,
+        "memory": 23,
+        "responseTime": 115.7,
+        "tasksCompleted": 408,
+        "uptime": 1781814310810
+      }
+    },
+    {
+      "id": "agent-2",
+      "name": "Echo",
+      "status": "healthy",
+      "metrics": {
+        "cpu": 2.5,
+        "memory": 10.3,
+        "responseTime": 117.9,
+        "tasksCompleted": 832,
+        "uptime": 1781814310810
+      }
+    },
+    {
+      "id": "agent-3",
+      "name": "Nova",
+      "status": "healthy",
+      "metrics": {
+        "cpu": 6,
+        "memory": 38.9,
+        "responseTime": 71.5,
+        "tasksCompleted": 167,
+        "uptime": 1781814310810
+      }
+    },
+    {
+      "id": "agent-4",
+      "name": "Flux",
+      "status": "healthy",
+      "metrics": {
+        "cpu": 19.3,
+        "memory": 22.4,
+        "responseTime": 89.2,
+        "tasksCompleted": 702,
+        "uptime": 1781814310810
+      }
+    },
+    {
+      "id": "agent-5",
+      "name": "Iris",
+      "status": "healthy",
+      "metrics": {
+        "cpu": 14,
+        "memory": 27.7,
+        "responseTime": 83.9,
+        "tasksCompleted": 813,
+        "uptime": 1781814310810
+      }
+    }
+  ]
+}

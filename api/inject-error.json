@@ -1,0 +1,32 @@
+{
+  "status": "ok",
+  "timestamp": "2026-06-18T20:25:10.809Z",
+  "description": "Inject a fatal error that crashes the entire application until recovered",
+  "endpoints": {
+    "inject": {
+      "method": "GET",
+      "url": "https://ajitesh-jam.github.io/band-of-agents-demo/api/inject-error.html",
+      "effect": "Crashes the app and shows APPLICATION DOWN screen"
+    },
+    "recover": {
+      "method": "GET",
+      "url": "https://ajitesh-jam.github.io/band-of-agents-demo/api/recover.html",
+      "effect": "Clears crash state and restores the app"
+    },
+    "injectQueryParam": {
+      "method": "GET",
+      "url": "https://ajitesh-jam.github.io/band-of-agents-demo/?injectError=true",
+      "effect": "Same as inject endpoint via query parameter"
+    },
+    "recoverQueryParam": {
+      "method": "GET",
+      "url": "https://ajitesh-jam.github.io/band-of-agents-demo/?recover=true",
+      "effect": "Same as recover endpoint via query parameter"
+    }
+  },
+  "console": {
+    "injectFatalError": "bandAPI.injectFatalError()",
+    "recover": "bandAPI.recover()",
+    "checkCrashed": "bandAPI.isCrashed()"
+  }
+}
