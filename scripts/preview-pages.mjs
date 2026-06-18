@@ -4,7 +4,8 @@ import { join, extname } from 'node:path'
 
 const BASE = '/band-of-agents-demo'
 const OUT = join(import.meta.dirname, '..', 'out')
-const PORT = Number(process.env.PORT || 3000)
+const START_PORT = Number(process.env.PORT || 3000)
+const MAX_PORT = START_PORT + 10
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -19,7 +20,7 @@ const MIME = {
   '.txt': 'text/plain; charset=utf-8',
 }
 
-createServer((req, res) => {
+const server = createServer((req, res) => {
   let pathname = req.url?.split('?')[0] ?? '/'
 
   if (!pathname.startsWith(BASE)) {
@@ -42,6 +43,28 @@ createServer((req, res) => {
   const ext = extname(absolute)
   res.writeHead(200, { 'Content-Type': MIME[ext] ?? 'application/octet-stream' })
   res.end(readFileSync(absolute))
-}).listen(PORT, () => {
-  console.log(`Preview: http://localhost:${PORT}${BASE}/`)
 })
+
+let port = START_PORT
+
+function start() {
+  server.listen(port, () => {
+    console.log(`Preview: http://localhost:${port}${BASE}/`)
+    if (port !== START_PORT) {
+      console.log(`(Port ${START_PORT} was busy, using ${port} instead.)`)
+    }
+  })
+}
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE' && !process.env.PORT && port < MAX_PORT) {
+    port += 1
+    start()
+    return
+  }
+
+  console.error(`Failed to start preview server: ${err.message}`)
+  process.exit(1)
+})
+
+start()
